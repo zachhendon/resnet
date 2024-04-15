@@ -13,7 +13,6 @@ def data_loader(
         std=[0.2023, 0.1994, 0.2010],
     )
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         normalize,
     ])
