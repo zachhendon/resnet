@@ -9,7 +9,7 @@ test_loader = data_loader(
 num_test = sum(len(inputs) for inputs, _ in test_loader)
 
 model = ResNet().cuda()
-model.load_state_dict(torch.load('models/resnet-25_20240417_010445/checkpoint_91'))
+model.load_state_dict(torch.load('models/resnet-v2_20240417_013340/checkpoint_173'))
 
 num_correct = 0
 model.eval().cuda()

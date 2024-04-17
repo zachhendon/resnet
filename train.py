@@ -79,8 +79,7 @@ def train(model, loss_fn, optimizer, scheduler, epochs, model_name):
 
 
 train_loader, val_loader = data_loader(
-    data_dir='./data/datasets', batch_size=128,
-    subset_ratio=0.25
+    data_dir='./data/datasets', batch_size=128
 )
 num_training = sum(len(inputs) for inputs, _ in train_loader)
 num_val = sum(len(inputs) for inputs, _ in val_loader)
@@ -92,6 +91,6 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_dec
 scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[90, 135], gamma=0.25)
 EPOCHS = 180
 
-model_name = 'resnet-25'
+model_name = 'resnet-v2'
 
 train(model, loss_fn, optimizer, scheduler, EPOCHS, model_name)
