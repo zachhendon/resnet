@@ -79,7 +79,8 @@ def train(model, loss_fn, optimizer, scheduler, epochs, model_name):
 
 
 train_loader, val_loader = data_loader(
-    data_dir='./data/datasets', batch_size=128
+    data_dir='./data/datasets', batch_size=128,
+    subset_ratio=0.25
 )
 num_training = sum(len(inputs) for inputs, _ in train_loader)
 num_val = sum(len(inputs) for inputs, _ in val_loader)
@@ -88,9 +89,9 @@ model = ResNet().cuda()
 
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
-scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[90, 135], gamma=0.1)
+scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[90, 135], gamma=0.25)
 EPOCHS = 180
 
-model_name = input()
+model_name = 'resnet-25'
 
 train(model, loss_fn, optimizer, scheduler, EPOCHS, model_name)
