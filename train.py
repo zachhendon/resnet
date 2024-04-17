@@ -4,6 +4,7 @@ from data.dataset import data_loader
 from model import ResNet
 from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
+import torch.backends.cuda as cudnn
 
 def train_epoch(model, loss_fn, optimizer, scheduler):
     running_loss = 0
@@ -77,20 +78,25 @@ def train(model, loss_fn, optimizer, scheduler, epochs, model_name):
             model_path = f"models/{model_name}_{timestamp}/checkpoint_{epoch}"
             torch.save(model.state_dict(), model_path)
 
+    torch.save(model.state_dict(), f"models/{model_name}_{timestamp}/best_model")
+
 
 train_loader, val_loader = data_loader(
-    data_dir='./data/datasets', batch_size=128
+    data_dir='./data/datasets', batch_size=128,
+    subset_ratio=1
 )
 num_training = sum(len(inputs) for inputs, _ in train_loader)
 num_val = sum(len(inputs) for inputs, _ in val_loader)
 
-model = ResNet().cuda()
+model = ResNet([2, 2, 2, 2]).cuda()
+model = nn.DataParallel(model)
+cudnn.benchmark = True
 
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
 scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[90, 135], gamma=0.25)
 EPOCHS = 180
 
-model_name = 'resnet-v2'
+model_name = 'resnet34'
 
 train(model, loss_fn, optimizer, scheduler, EPOCHS, model_name)

@@ -1,2 +1,4 @@
 /data/datasets/
 .idea
+/models/*/checkpoint*
+train.ipynb

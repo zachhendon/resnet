@@ -1,15 +1,7 @@
 import torch.nn as nn
 
-def get_layer(in_channels, out_channels, num_blocks):
-    downsample = in_channels != out_channels
-    blocks = [ResidualBlock(in_channels, out_channels, downsample=downsample)]
-
-    for _ in range(num_blocks - 1):
-        blocks.append(ResidualBlock(out_channels, out_channels))
-    return nn.Sequential(*blocks)
-
 class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, downsample=False):
+    def __init__(self,  in_channels, out_channels, downsample=False):
         super(ResidualBlock, self).__init__()
 
         stride = 2 if downsample else 1
@@ -23,45 +15,57 @@ class ResidualBlock(nn.Module):
             nn.BatchNorm2d(out_channels)
         )
 
-        self.downsample = downsample
+        self.shortcut = nn.Sequential()
         if downsample:
-            self.downsampleLayer = nn.Sequential(
+            self.shortcut = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=2, padding=0, bias=False),
                 nn.BatchNorm2d(out_channels)
             )
 
+        self.relu = nn.ReLU()
+
     def forward(self, x):
-        residual = x
         out = self.conv1(x)
         out = self.conv2(out)
-        if self.downsample:
-            residual = self.downsampleLayer(x)
-        out += residual
-        out = nn.ReLU()(out)
+        out += self.shortcut(x)
+        out = self.relu(out)
         return out
 
 class ResNet(nn.Module):
-    def __init__(self):
+    def __init__(self, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
+
+        self.in_channels = 64
+
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(16),
+            nn.Conv2d(3,64, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(64),
         )
-        self.layer2 = get_layer(16, 16, 9)
-        self.layer3 = get_layer(16, 32, 9)
-        self.layer4 = get_layer(32, 64, 9)
-        self.avgpool = nn.AvgPool2d(kernel_size=8)
+        self.layer2 = self._make_layer(64, num_blocks[0], downsample=False)
+        self.layer3 = self._make_layer(128, num_blocks[1], downsample=True)
+        self.layer4 = self._make_layer(256, num_blocks[2], downsample=True)
+        self.layer5 = self._make_layer(512, num_blocks[3], downsample=True)
+        self.avgpool = nn.AvgPool2d(kernel_size=4)
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(64, 10),
+            nn.Linear(512, 10),
             nn.Softmax(dim=1)
         )
+
+    def _make_layer(self, out_channels, num_blocks, downsample):
+        blocks = [ResidualBlock(self.in_channels, out_channels, downsample=downsample)]
+        self.in_channels = out_channels
+
+        for _ in range(num_blocks - 1):
+            blocks.append(ResidualBlock(self.in_channels, out_channels, downsample=False))
+        return nn.Sequential(*blocks)
 
     def forward(self, x):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
+        x = self.layer5(x)
         x = self.avgpool(x)
         x = self.fc(x)
 

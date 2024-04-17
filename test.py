@@ -1,6 +1,7 @@
 import torch
 from model import ResNet
 from data.dataset import data_loader
+import torch.nn as nn
 
 test_loader = data_loader(
     data_dir='./data/datasets', batch_size=128,
@@ -8,8 +9,9 @@ test_loader = data_loader(
 )
 num_test = sum(len(inputs) for inputs, _ in test_loader)
 
-model = ResNet().cuda()
-model.load_state_dict(torch.load('models/resnet-v2_20240417_013340/checkpoint_173'))
+model = ResNet([2, 2, 2, 2]).cuda()
+model = nn.DataParallel(model)
+model.load_state_dict(torch.load('models/resnet-v3_20240417_153020/checkpoint_161'))
 
 num_correct = 0
 model.eval().cuda()
