@@ -88,7 +88,7 @@ train_loader, val_loader = data_loader(
 num_training = sum(len(inputs) for inputs, _ in train_loader)
 num_val = sum(len(inputs) for inputs, _ in val_loader)
 
-model = ResNet([2, 2, 2, 2]).cuda()
+model = ResNet([3, 4, 6, 3]).cuda()
 model = nn.DataParallel(model)
 cudnn.benchmark = True
 

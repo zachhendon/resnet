@@ -9,9 +9,9 @@ test_loader = data_loader(
 )
 num_test = sum(len(inputs) for inputs, _ in test_loader)
 
-model = ResNet([2, 2, 2, 2]).cuda()
+model = ResNet([3, 4, 6, 3]).cuda()
 model = nn.DataParallel(model)
-model.load_state_dict(torch.load('models/resnet-v3_20240417_153020/checkpoint_161'))
+model.load_state_dict(torch.load('models/resnet34_20240417_173517/best_model'))
 
 num_correct = 0
 model.eval().cuda()
