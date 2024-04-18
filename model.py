@@ -70,3 +70,13 @@ class ResNet(nn.Module):
         x = self.fc(x)
 
         return x
+
+def get_resnet18():
+    model = ResNet([2, 2, 2, 2])
+    model = nn.DataParallel(model)
+    return model
+
+def get_resnet34():
+    model = ResNet([3, 4, 6, 3])
+    model = nn.DataParallel(model)
+    return model

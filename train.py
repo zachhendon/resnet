@@ -77,12 +77,12 @@ def train(model, loss_fn, optimizer, scheduler, epochs, model_name, writer):
     torch.save(model.state_dict(), best_model_path)
     print(f"Saved best model to {best_model_path}")
 
-# Get model from args
+# Get model and size of dataset from args
+parser = argparse.ArgumentParser(description="train.py is the program to train the CIFAR-10 dataset on a ResNet model")
 models = {
     "resnet18": get_resnet18,
     "resnet34": get_resnet34
 }
-parser = argparse.ArgumentParser(description="train.py is the program to train the CIFAR-10 dataset on a ResNet model")
 parser.add_argument('-m', '--model',
                     action='store',
                     type=str,
@@ -99,7 +99,7 @@ parser.add_argument('-s', '--size',
                     action='store',
                     default=1,
                     type=size_range,
-                    help="the percent of the dataset to use for training - range=[0.01, 1]",
+                    help="the percent of the dataset to use for training - range=[0.01, 1] (default=1)",
                     metavar="")
 args = parser.parse_args()
 model_name = args.model
@@ -128,5 +128,5 @@ EPOCHS = 180
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 writer = SummaryWriter(f"models/{model_name}_{timestamp}")
 
-print("Starting training")
+print(f"Starting training for {model_name}_{timestamp}")
 train(model, loss_fn, optimizer, scheduler, EPOCHS, model_name, writer)
